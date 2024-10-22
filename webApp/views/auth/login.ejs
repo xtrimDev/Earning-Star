@@ -1,0 +1,28 @@
+<%- include("partials/header") -%>
+  <div class="container">
+    <div class="wrapper">
+      <div class="title">
+        <span>Login Form</span>
+      </div>
+      <form id="loginForm" method="POST">
+        <div class="row">
+          <i class="fas fa-mail-bulk"></i>
+          <input type="email" name="email" placeholder="Enter your email..." autocomplete="off" required />
+        </div>
+        <div class="row">
+          <i class="fas fa-lock"></i>
+          <input type="password" name="password" placeholder="Enter your password..." autocomplete="off" required />
+        </div>
+        <div class="pass">
+          <a href="/auth/forgotPassword">Forgot password?</a>
+        </div>
+        <div class="row button">
+          <input type="submit" value="Login" />
+        </div>
+        <div class="signup-link">
+          Not a member? <a href="/auth/register">Signup now</a>
+        </div>
+      </form>
+    </div>
+  </div>
+  <%- include("partials/footer") -%>

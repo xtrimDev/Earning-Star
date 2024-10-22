@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= appName %></title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.2/axios.min.js" integrity="sha512-JSCFHhKDilTRRXe9ak/FJ28dcpOJxzQaCd3Xg8MyF6XFjODhy/YMCM8HW0TFDckNHWUewW+kfvhin43hKtJxAw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>    
+    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v12.0"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="/css/style.css" />
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+
+<body>
+    <div class="app">
+        <div class="container">
+            <div class="box">
+                <div class="upper">
+                    <div class="box-links">
+                        <div class="rules">
+                            <div class="icon">
+                                <div class="ico-rules ico"></div>
+                            </div>
+                            <div class="text" id="btn-rule">
+                                <span>Rules</span>
+                            </div>
+                        </div>
+                        <div class="invite">
+                            <div class="icon">
+                                <div class="ico-invite ico"></div>
+                            </div>
+                            <div class="text" id="btn-invite">
+                                <span>Invitation</span>
+                            </div>
+                        </div>
+                        <div class="cash">
+                            <div class="icon">
+                                <div class="ico-cash ico"></div>
+                            </div>
+                            <div class="text" id="btn-cash-out">
+                                <span>Cash Out</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slot-machine">
+                        <div class="machine"></div>
+                        <div class="item">
+                            <div id="item-1">0</div>
+                            <div id="item-2">0</div>
+                            <div id="item-3">0</div>
+                        </div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress">
+                            <div class="progress-bg" id="earningProgress" style="width: <%= (userGameData.totalEarnings * 100)/withdrawalAmount %>%;"></div>
+                        </div>
+                        <span class="progress-text"><data id="totalEarnings"><%= userGameData.totalEarnings %></data> ₹</span>
+                    </div>
+                    <div class="progress-caption">
+                        <% if (withdrawalAmount - userGameData.totalEarnings < 0) { %>
+                            <span>You can withdraw your money now</span>
+                        <% } else { %>
+                            <span>Need <data id="totalEarningsToWithdrwal"><%= withdrawalAmount - userGameData.totalEarnings %></data>₹ more to withdraw the cash</span>
+                        <% } %>
+                    </div>
+                    <div class="buttons">
+                        <div class="spin" id="run-spin"></div>
+                        <div class="spin-caption">
+                            <span>you have <data id="spinsAvailable"><%= userGameData.spinsAvailable %></data> Spin left</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bottom">
+                    <div class="info">
+                        <p>Invite Friend to get more spins.</p>
+                    </div>
+                    <div class="share">
+                        <span>Share to:<data id="hii"></data> </span>
+                        <div class="socials">
+                            <button class="link sc-ico"></button>
+                            <button class="fb fb-share sc-ico"></button>
+                            <button class="wp sc-ico"></button>
+                            <button class="twit sc-ico"></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="pop" id="dialog-rule">
+            <div class="main-dialog">
+                <div class="title">Game Rules</div>
+                <p>Welcome to <%= appName%> Slot Machine!</p>
+                <p>Here are the rules you need to know:</p>
+                <ol>
+                    <li>Everyone starts with <%= defaultSpins %> free gems.</li>
+                    <li>
+                        When you run out of gems, don't worry! You can earn extra gems by
+                        inviting your friends. Each time a friend joins the channel
+                        through your invitation, you will receive additional gems.
+                    </li>
+                    <li>
+                        Each time the Slot Machine starts spinning, you will receive a
+                        different amount of rewards, depending on your luck. Once you
+                        reach a certain amount, you can cash out. Manual review will take
+                        1-7 working days.
+                    </li>
+                    <li><%= appName%> holds all rights to rule interpretation.</li>
+                </ol>
+                <p>Let's play the Slot Machine to Earn!</p>
+                <div class="close" id="btn-rule-close"></div>
+            </div>
+        </div>
+        <div class="pop" id="dialog-invite">
+            <div class="main-dialog">
+                <div class="title">Invitation History</div>
+                <p>You have invited <%= referredUserNames.length %> friends:</p>
+                <% if (referredUserNames.length > 0) { %>
+                <ol>
+                    <% referredUserNames.forEach(function(name) { %>
+                        <li><%= name %></li>
+                    <% }); %>
+                </ol>
+                <% } %>
+                <p>Here are the rules you need to know:</p>
+                <ol>
+                    <li>
+                        If the person you invite doesn't join our channel, the person would't show in the list and you can't get
+                        tickets!
+                    </li>
+                    <li>Only show recent 50 invitations</li>
+                </ol>
+                <p>Let's play the Slot Machine to Earn!</p>
+                <div class="close" id="btn-invite-close"></div>
+            </div>
+        </div>
+        <div class="pop" id="dialog-cash-out">
+            <div class="main-dialog">
+                <div class="right">
+                    <button id="btn-trns-hist">History</button>
+                </div>
+                <p>Cash out info:</p>
+                <form id="withdrawForm" method="post">
+                    <label for="cash-to-be-out">Cash to be out (min ₹<%= withdrawalAmount %>)</label>
+                    <input type="number" id="cash-to-be-out" min="<%= withdrawalAmount %>" name="withdrawalAmt" placeholder="₹ 0" autocomplete="off" required/>
+                    <label for="cash-to-be-out">Available withdrawal amount : <data id="widthdraw-amt"><%= userGameData.totalEarnings %></data></label>
+
+                    <p>Account Info:</p>
+
+                    <label for="name">Name as per UPI ID</label>
+                    <input type="text" id="name" name="name" placeholder="Name" autocomplete="off" required />
+                    
+                    <label for="Account-number">UPI Id</label>
+                    <input type="upi-id" id="Account-number" name="upiId" placeholder="UPI Id" autocomplete="off" required/>
+                    
+                    <div class="buttons" style="flex-direction: row;">
+                        <div class="close" type="menu" id="btn-cash-out-close"></div>
+                        <button type="submit" class="cash-out" id="btn-cash-out"></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="pop" id="dialog-trns-hist">
+            <div class="main-dialog">
+                <div class="title">Transaction History</div>
+                <div class="transactions" id="transactions">
+                    <p>No transaction History</p>
+                </div>
+                <div class="close" id="btn-trns-hist-close"></div>
+            </div>
+        </div>
+        <div class="pop" id="dialog-join-primary-Channels">
+            <div class="main-dialog">
+                <div class="right">
+                    <button id="btn-trns-hist" style="padding: 3px 9px; font-weight: 700; font-size: 19px;" onclick="window.location.reload()">&#8634;</button>
+                </div>
+                <div class="title">Join Channel</div>
+                <p class="caption" style="text-wrap: wrap; text-align: center;">To continue, please join the channels by clicking the button below, and then refresh the page.</p>
+                <div class="buttons">
+                    <% for (let i = 0; i < notJoinedList.length; i++) { %>
+                        <button class="big-button" onclick="window.open('https://t.me/<%= notJoinedList[i].username %>', '_blank')">
+                            @<%= notJoinedList[i].username %>
+                        </button>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+        <div class="pop" id="dialog-loader">
+            <div class="loader"></div>
+        </div>
+    </div>
+    <script src="/js/app.js"></script>
+    <script>
+
+        const JoinedAllPrimaryChannel = <%= allPrimaryChannelJoined %>;
+        if (!JoinedAllPrimaryChannel) {
+            $("#dialog-join-primary-Channels").css("display", "flex")
+        }
+    </script>
+</body>
+
+</html>
