@@ -6,11 +6,21 @@ require("dotenv").config();
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
-const uri = "mongodb+srv://xtrimDev:QXMEo7PqKe3252ur@winzyluckey.fc2thwh.mongodb.net/";
-const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: { version: ServerApiVersion.v1, strict: true, deprecationErrors: false } });
+const uri = `${process.env.DB_URL}`; // Add DB name at the end
 
-const db = client.db(process.env.DB_NAME)
+const client = new MongoClient(uri, { 
+  useNewUrlParser: true, 
+  useUnifiedTopology: true, 
+  serverApi: { 
+    version: ServerApiVersion.v1, 
+    strict: true, 
+    deprecationErrors: false 
+  }
+});
+
 client.connect();
+
+const db = client.db();
 
 /** all variables */
 let IsPassword = false;
